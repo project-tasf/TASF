@@ -1,0 +1,102 @@
+﻿一、官方依据
+
+核查日期：2026-11-04。依据 AMD PG026 v9.0（PDF 标注 2021-02-04），并核对
+Vivado 2026.1 随附 Convolutional Encoder 9.0 revision 24 的保存值与实际生成参数。
+以下对应工程中明确设置的 12 项 IP 定制参数；模块名另列。参数通过正常 IP 定制流程设置。
+
+二、逐项参数
+
+CONFIG.Punctured = true
+作用：固定删余编码模式。
+官方要求与本例：官方提供固定删余模式；本例运行中不改变码率或图案。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=20
+
+CONFIG.Input_Rate = 2
+作用：删余输入码率 N。
+官方要求与本例：允许整数 2～12，本例 N=2。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=20
+
+CONFIG.Output_Rate = 3
+作用：每 N 位输入保留的编码位数 M。
+官方要求与本例：必须满足 N<M<2N，本例 2<3<4。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=20
+
+CONFIG.Puncture_Code0 = 11
+作用：Code0 的删余图案。
+官方要求与本例：图案长度应等于 N；本例为 2 位，含 2 个 1。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=20
+
+CONFIG.Puncture_Code1 = 01
+作用：Code1 的删余图案。
+官方要求与本例：本例为 2 位，含 1 个 1；两图案的 1 合计 3，等于 M。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=20
+
+CONFIG.Constraint_Length = 3
+作用：约束长度 K。
+官方要求与本例：允许 3～9，含边界；本例 K=3。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=20
+
+CONFIG.Convolution_Code_Radix = Binary
+作用：多项式数字进制。
+官方要求与本例：允许 Binary、Octal、Decimal；本例 Binary。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=20
+
+CONFIG.Convolution_Code0 = 101
+作用：第一个编码多项式。
+官方要求与本例：删余模式使用两个 K 位多项式；本例转换为二进制 101，长度为 3。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=20
+
+CONFIG.Convolution_Code1 = 111
+作用：第二个编码多项式。
+官方要求与本例：本例转换为二进制 111，长度为 3，与 K 一致。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=20
+
+CONFIG.Dual_Output = false
+作用：单路串行或双路并行输出。
+官方要求与本例：官方允许两种形式；本例每笔有效输出 1 位，TDATA 端口补零到 8 位。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=13
+
+CONFIG.TREADY = true
+作用：输出接收握手引脚。
+官方要求与本例：本例启用 m_axis_data_tready；官方支持接收端反压和输入端自动流控。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=17
+
+CONFIG.ACLKEN = false
+作用：可选时钟使能引脚。
+官方要求与本例：本例不生成该可选引脚。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=10
+
+Component_Name = convolution_0
+名称以字母开头，仅使用小写字母、数字和下划线，符合命名规则。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=20
+
+三、接口、激励及仿真条件
+
+有效输入是 1 位，实际输出是 1 位；TDATA 按字节补零，不把无效高位当作额外随机数据。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=12
+https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=13
+
+复位至少拉低 2 拍；本例拉低 32 拍、释放后再等待 32 拍。可选事件输出不用时，输入 TLAST 可固定为低或高；
+本例固定为低，事件输出留空。未生成 ACLKEN 引脚。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=11
+https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=12
+
+输入 VALID 不等待 READY 才拉高；一旦有效便保持 DATA 和 VALID，直到握手。
+随机输入间隔只插在已完成的输入事务之间；READY 的高低持续时间独立生成。
+模型和输出计数均以 VALID 与 READY 同时为 1 的上升沿作为传输依据。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=17
+关联官方资料：https://docs.amd.com/v/u/en-US/ug1037-vivado-axi-reference-guide
+
+有限数据流末尾需要补零推动待输出结果；本例追加 32 个 0，并检查 144 个有效载荷输出均已接收。
+不把补零尾部未全部输出作为本例的数据错误。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=18
+
+DATA_SEED、GAP_SEED、FLOW_SEED、间隔范围和有效载荷长度是 testbench 激励设置，不是 IP 定制参数。
+使用明确实现的 32 位伪随机算法、非零种子及独立状态以便重复复现；时序仍满足上述握手规则。
+output_number 是观察编号，不驱动 IP；input_trace.csv、output_trace.csv、ready_trace.csv 记录实际运行过程。
+
+PG026 提供行为仿真支持并引用 UG900。本例使用 XSim、正常生成的仿真文件及 UltraScale+ 器件；未使用 UNIFAST，
+未修改厂商实现文件。逐项核对生成模型参数后完成运行。
+官方链接：https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=4
+https://docs.amd.com/api/khub/documents/7jKRAFZMcndeF6BBGgZ6jQ/content#page=23
+关联官方资料：https://docs.amd.com/r/en-US/ug900-vivado-logic-simulation/Simulating-IP

@@ -1,0 +1,179 @@
+一、公开资料与取值依据
+公开依据为 AMD PG268，版本 1.0；本次访问的网页标注发布日期为 2025-12-09。
+核查日期：2026-10-20。文档日期与 IP 实现修订号分别记录。
+本案例实际使用 Vivado 2026.1 随附的 TMR Voter 1.0 Rev.10。
+官方手册：https://docs.amd.com/r/en-US/pg268-tmr
+用户参数表：https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+配置界面说明：https://docs.amd.com/r/en-US/pg268-tmr/TMR-Voter
+
+以下逐项说明本工程明确设置的 18 个 IP 参数，取值已与保存的 XCI 及 Vivado 回读结果核对。
+公开参数范围以 PG268 的 TMR Voter Design Parameters 表为依据。
+配置项启用条件及 C_INPUT_REGISTER 的取值，另核对 AMD 随 Vivado 2026.1 交付的：
+data/ip/xilinx/tmr_voter_v1_0/component.xml
+data/ip/xilinx/tmr_voter_v1_0/xgui/tmr_voter_v1_0.tcl
+上述路径相对于 Vivado 安装目录，所列文件均随官方安装版交付。
+
+二、逐项参数说明
+
+CONFIG.C_TMR = 0
+作用：选择 Lockstep 工作模式。
+官方要求与本例说明：PG268 列出 0=Lockstep、1=TMR；本例选择 0。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+
+CONFIG.C_COMPARATOR = 1
+作用：开启内置比较器。
+官方要求与本例说明：PG268 允许 0 或 1。安装版配置脚本在两个 Temporal Depth 均为 0 时允许设置此选项；本例满足该条件。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+https://docs.amd.com/r/en-US/pg268-tmr/TMR-Voter
+
+CONFIG.C_VOTER_CHECK = 0
+作用：保持自检查投票器关闭。
+官方要求与本例说明：PG268 定义 0/1。安装版 GUI 在 Lockstep 下禁用该勾选项；本例保持 0，未强制开启。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+
+CONFIG.C_TEMPORAL_DEPTH1 = 0
+作用：将第一个接口的时序错位延迟设为 0 个周期。
+官方要求与本例说明：PG268 定义 0 为关闭、1–31 为延迟周期数；本例 0 表示不使用时序错位。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+https://docs.amd.com/r/en-US/pg268-tmr/TMR-Voter
+
+CONFIG.C_TEMPORAL_DEPTH2 = 0
+作用：将第二个接口的时序错位延迟设为 0 个周期。
+官方要求与本例说明：PG268 定义 0 为关闭、1–31 为延迟周期数；本例 0 表示不使用时序错位。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+https://docs.amd.com/r/en-US/pg268-tmr/TMR-Voter
+
+CONFIG.C_INTERFACE = 5
+作用：选择 AXI4-Stream Slave 接口。
+官方要求与本例说明：PG268 的 TMR Voter 参数表列出 5=AXI4-Stream Slave，安装版枚举也包含该值。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+https://docs.amd.com/r/en-US/pg268-tmr/Supported-Interfaces
+
+CONFIG.C_AXIS_DATA_WIDTH = 8
+作用：设置业务 AXI4-Stream 数据宽度为 8 位。
+官方要求与本例说明：PG268 的允许范围为 8–512 位；本例取 8 位，即一个字节。生成顶层的业务 TDATA 端口为 8 位，与另行配置的 32 位比较状态读取接口不同。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+
+CONFIG.C_INPUT_REGISTER = 0
+作用：关闭比较前的输入寄存器。
+官方要求与本例说明：此参数的直接依据为安装版 component.xml 中 PARAM_VALUE.C_INPUT_REGISTER 的 0/1 枚举，以及 xgui/tmr_voter_v1_0.tcl 的 update_PARAM_ENABLEMENT.C_INPUT_REGISTER 回调。回调要求内置比较器开启，本例 C_COMPARATOR=1。PG268 的 TMR Voter 参数表未单列此项。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/TMR-Voter
+
+CONFIG.C_USE_TMR_DISABLE = 1
+作用：启用可选 TMR Disable 输入。
+官方要求与本例说明：PG268 允许 0=关闭、1=开启；本例取 1。此处记录的是端口配置，仿真未进入运行阶段。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+
+CONFIG.C_TEST_COMPARATOR = 1
+作用：开启比较器状态读取接口。
+官方要求与本例说明：PG268 定义 0=NONE、1=READ、2=INJECT；本例取 1（READ）。本例已开启内置比较器。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+https://docs.amd.com/r/en-US/pg268-tmr/TMR-Voter
+
+CONFIG.C_TEST_LAST_INTERFACE = 0
+作用：将比较状态读取接口配置为非链末端。
+官方要求与本例说明：PG268 允许 0/1；本例取 0。安装版要求 C_TEST_COMPARATOR>0 才启用此项，本例满足。该选项描述拟连接的状态读取链位置，本次仅检查 IP 的静态展开。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+https://docs.amd.com/r/en-US/pg268-tmr/TMR-Voter
+
+CONFIG.C_TEST_AXIS_DATA_WIDTH = 32
+作用：将比较状态读取 AXI4-Stream 接口数据宽度设为 32 位。
+官方要求与本例说明：PG268 为此参数列出的允许值是 32。本例为 32，且 C_TEST_COMPARATOR>0；它与业务流接口的数据位宽是不同参数。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+
+CONFIG.C_AXIS_HAS_ID_WIDTH = 1
+作用：启用业务 AXI4-Stream 接口的 TID 可选字段。
+官方要求与本例说明：安装版 component.xml 的 PARAM_VALUE.C_AXIS_HAS_ID_WIDTH 枚举为 0=disable、1=enable，并用于相应端口的启用表达式；bd/bd.tcl 在传播非零字段位宽时将此标志设为 1。本例取 1，并设置相应位宽为 1，已核对生成顶层存在该端口。PG268 未单列此辅助标志，直接依据为上述官方安装文件。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+
+CONFIG.C_AXIS_ID_WIDTH = 1
+作用：设置业务 AXI4-Stream 的 TID 位宽为 1 位。
+官方要求与本例说明：PG268 的允许范围为 1–32 位；安装版 component.xml 的 maximum 同为 32。本例 1 位在范围内，且 C_AXIS_HAS_ID_WIDTH=1，生成端口已核对为 1 位。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+
+CONFIG.C_AXIS_HAS_DEST_WIDTH = 1
+作用：启用业务 AXI4-Stream 接口的 TDEST 可选字段。
+官方要求与本例说明：安装版 component.xml 的 PARAM_VALUE.C_AXIS_HAS_DEST_WIDTH 枚举为 0=disable、1=enable，并用于相应端口的启用表达式；bd/bd.tcl 在传播非零字段位宽时将此标志设为 1。本例取 1，并设置相应位宽为 1，已核对生成顶层存在该端口。PG268 未单列此辅助标志，直接依据为上述官方安装文件。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+
+CONFIG.C_AXIS_DEST_WIDTH = 1
+作用：设置业务 AXI4-Stream 的 TDEST 位宽为 1 位。
+官方要求与本例说明：PG268 的允许范围为 1–32 位；安装版 component.xml 的 maximum 同为 32。本例 1 位在范围内，且 C_AXIS_HAS_DEST_WIDTH=1，生成端口已核对为 1 位。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+
+CONFIG.C_AXIS_HAS_USER_WIDTH = 1
+作用：启用业务 AXI4-Stream 接口的 TUSER 可选字段。
+官方要求与本例说明：安装版 component.xml 的 PARAM_VALUE.C_AXIS_HAS_USER_WIDTH 枚举为 0=disable、1=enable，并用于相应端口的启用表达式；bd/bd.tcl 在传播非零字段位宽时将此标志设为 1。本例取 1，并设置相应位宽为 1，已核对生成顶层存在该端口。PG268 未单列此辅助标志，直接依据为上述官方安装文件。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+
+CONFIG.C_AXIS_USER_WIDTH = 1
+作用：设置业务 AXI4-Stream 的 TUSER 位宽为 1 位。
+官方要求与本例说明：PG268 的允许范围为 1–4096 位；安装版 component.xml 的 maximum 同为 4096。本例 1 位在范围内，且 C_AXIS_HAS_USER_WIDTH=1，生成端口已核对为 1 位。
+官方链接：
+https://docs.amd.com/r/en-US/pg268-tmr/User-Parameters
+
+三、配置联动及测试范围
+
+AXI4-Stream Slave 的业务数据宽度为 8 位，启用 1 位 TID、1 位 TDEST 和 1 位 TUSER。比较器测试模式为 READ，状态读取接口为 32 位，配置为非链末端；业务接口和状态读取接口分别配置。
+可选字段的启用标志和位宽配套设置，并已核对生成顶层的端口与配置一致；启用标志的直接依据为官方安装文件的定义及属性传播规则。
+
+已核对配置脚本中的联动条件：两个时序错位延迟均为 0，内置比较器选项可配置；
+开启内置比较器后，输入寄存器选项可配置；Lockstep 下自检查投票器保持关闭。
+仅在启用比较器测试接口时设置 Last Interface 和 Status Read Data Width。
+接口专用位宽仅按当前所选接口设置。未启用的接口和可选旁带字段不作为本案例的配置内容。
+以上取值符合所核对的公开参数范围及安装版配置联动条件。
+Vivado 接受了这些配置，IP 状态为 Up-to-date，仿真目标生成成功。
+
+本次检查范围为官方 IP 的生成、编译和静态展开。
+未连接处理器、存储器或 AXI 外设，也未执行总线事务、状态读取或故障注入。
+本工程未构建完整容错子系统，验证范围不包括运行阶段的容错、恢复或接口功能。
+在仿真运行之前发生的静态展开错误，是本例提交核查的现象。
+官方接口说明：https://docs.amd.com/r/en-US/pg268-tmr/Supported-Interfaces
+官方仿真说明：https://docs.amd.com/r/en-US/pg268-tmr/Simulation
+
+四、随附工程和仿真命令
+
+工程入口：case_project/tmr_voter_case.xpr。
+器件：xcu250-figd2104-2L-e；需安装对应器件支持。
+IP 配置：case_project/ip/tmr_voter_0/tmr_voter_0.xci。
+IP VLNV：xilinx.com:ip:tmr_voter:1.0；模块名及仿真顶层：tmr_voter_0。
+工程引用 XCI 的相对路径；仿真实现文件由安装的 Vivado 2026.1 生成。
+
+工程已保存以下仿真设置：
+target_language=VHDL：生成 VHDL 顶层封装。
+simulator_language=Mixed：允许混合语言仿真。
+sim.use_ip_compiled_libs=false：从随安装版提供的官方源文件编译 IP 仿真库。
+sim_1 的 top=tmr_voter_0：直接以生成的 IP 作为仿真顶层。
+sim_1 的 top_auto_set=false：固定使用此顶层。
+xsim.elaborate.mt_level=off：使用单线程展开。
+xsim.simulate.runtime=100ns：正常完成展开后所请求的运行时长，本次未进入运行阶段。
+这些是工程及仿真设置，不是 IP 的 CONFIG 参数。
+官方仿真选项说明：
+https://docs.amd.com/r/en-US/ug900-vivado-logic-simulation/Vivado-Simulator-Simulation-Options
+
+打开 .xpr 工程后执行：
+
+generate_target simulation [get_ips tmr_voter_0]
+作用：根据保存的 IP 配置生成仿真目标文件。
+官方链接：https://docs.amd.com/r/en-US/ug835-vivado-tcl-commands/generate_target
+
+launch_simulation -simset sim_1 -mode behavioral
+作用：启动 sim_1 的行为仿真流程。本例编译完成后，在静态展开阶段报错。
+官方链接：https://docs.amd.com/r/en-US/ug835-vivado-tcl-commands/launch_simulation

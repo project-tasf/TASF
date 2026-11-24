@@ -1,0 +1,237 @@
+﻿一、公开资料与取值依据
+公开依据为 AMD PG104，版本 6.0；本次访问的网页标注发布日期为 2024-11-26。
+核查日期：2026-10-16。文档日期与 IP 实现修订号分别记录，不将二者混同。
+本案例实际使用 Vivado 2026.1 随附的 Complex Multiplier 6.0 Rev.28。
+官方手册：https://docs.amd.com/r/en-US/pg104-cmpy
+GUI 字段与 Tcl 参数对应关系：
+https://docs.amd.com/r/en-US/pg104-cmpy/User-Parameters
+
+以下逐项对应随附工程中设置的 19 个 IP 参数。公开网页未写出数值上下界的，
+补充依据来自 AMD 随 Vivado 交付的 data/ip/xilinx/cmpy_v6_0/component.xml，
+对应 PARAM_VALUE.<参数名> 的 minimum、maximum 或枚举定义；
+舍入模式的输出位宽上限另依据同目录 xgui/cmpy_v6_0.tcl 的 updateOfOutputWidth 回调。
+公开链接用于核对参数功能；不会将安装文件中的数值上界说成网页原文。
+
+二、逐项参数说明
+
+01. CONFIG.APortWidth = 24
+作用：设置 A 的实部、虚部各为 24 位。
+官方要求与本例说明：PG104 Feature Summary 规定整数分量宽度为 8–63 位，与安装版范围一致，本例 24 位合法且可表示输入。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Channel-A-Options
+https://docs.amd.com/r/en-US/pg104-cmpy/Feature-Summary
+
+02. CONFIG.BPortWidth = 8
+作用：设置 B 的实部、虚部各为 8 位。
+官方要求与本例说明：PG104 Feature Summary 规定整数分量宽度为 8–63 位，与安装版范围一致，本例 8 位合法且可表示输入。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Channel-B-Options
+https://docs.amd.com/r/en-US/pg104-cmpy/Feature-Summary
+
+03. CONFIG.OutputWidth = 32
+作用：设置输出实部、虚部各为 32 位。
+官方要求与本例说明：PG104 定义完整自然宽度为 A 位宽+B 位宽+1=33，允许缩短输出精度。安装版在 Random_Rounding 模式下将输出位宽上限设为完整宽度减 1，即 32；本例 32 位处于 2–32 范围内。输出减少 1 个低位，选择 Random_Rounding，ROUND_CY=0。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Output-Product-Range
+https://docs.amd.com/r/en-US/pg104-cmpy/Output-Rounding
+
+04. CONFIG.OptimizeGoal = Performance
+作用：选择 Performance 优化目标。
+官方要求与本例说明：PG104 提供 Resources 和 Performance 两种目标；本例使用其中的公开选项。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Channel-B-Options
+
+05. CONFIG.LatencyConfig = Manual
+作用：选择手动延迟。
+官方要求与本例说明：PG104 提供 Automatic 与 Manual 两种方式，Manual 允许用户设置延迟。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Core-Latency
+
+06. CONFIG.MinimumLatency = 55
+作用：设置手动延迟为 55 个使能时钟周期。
+官方要求与本例说明：安装版范围为 0–55，本例 55 在范围内。PG104 允许用附加延迟级实现超过完全流水线所需的延迟。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Core-Latency
+
+07. CONFIG.FlowControl = NonBlocking
+作用：选择 NonBlocking 接口。
+官方要求与本例说明：PG104 提供 Blocking 与 NonBlocking。本例无 TREADY；所有相关输入 TVALID 同时有效一个周期，只提交一次运算。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/NonBlocking-Mode
+
+08. CONFIG.RoundMode = Random_Rounding
+作用：选择 Random_Rounding 输出精度处理方式。
+官方要求与本例说明：PG104 允许在缩短整数输出精度时选择 Random Rounding，并启用 CTRL 通道。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Output-Rounding
+https://docs.amd.com/r/en-US/pg104-cmpy/Rounding
+
+09. CONFIG.ACLKEN = true
+作用：启用时钟使能端口。
+官方要求与本例说明：PG104 允许选配时钟使能。本例保持 aclken=1。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Control-Signals
+
+10. CONFIG.ARESETN = true
+作用：启用低有效同步复位端口。
+官方要求与本例说明：PG104 允许选配该端口。本例复位保持 50 周期，释放后等待 20 周期再提交数据。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Control-Signals
+https://docs.amd.com/r/en-US/pg104-cmpy/Resets
+
+11. CONFIG.HasATLAST = true
+作用：启用 A 的 TLAST 端口。
+官方要求与本例说明：PG104 将 TLAST 定义为可选输入。本例输入值为 1。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Channel-A-Options
+
+12. CONFIG.HasBTLAST = true
+作用：启用 B 的 TLAST 端口。
+官方要求与本例说明：PG104 将 TLAST 定义为可选输入。本例输入值为 0。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Channel-B-Options
+
+13. CONFIG.OutTLASTBehv = AND_all_TLASTs
+作用：设置输出 TLAST 规则为 AND_all_TLASTs。
+官方要求与本例说明：PG104 允许传递某一路已启用输入标志，或对所有已启用标志取逻辑与、逻辑或。本例所引用通道均已启用；A_TLAST=1、B_TLAST=0，预期输出为 0。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Output-TLAST-Behavior
+
+14. CONFIG.HasATUSER = true
+作用：启用 A 的 TUSER 端口。
+官方要求与本例说明：PG104 允许选配 TUSER。本例连接固定值 0。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Channel-A-Options
+
+15. CONFIG.HasBTUSER = false
+作用：关闭 B 的 TUSER 端口。
+官方要求与本例说明：PG104 允许选配 TUSER。本例关闭端口，未配置其无效位宽。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Channel-B-Options
+
+16. CONFIG.ATUSERWidth = 15
+作用：设置 A TUSER 为 15 位。
+官方要求与本例说明：PG104 允许指定 TUSER 位宽；安装版范围 1–256 位，本例 15 位在范围内且可表示 0。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Channel-A-Options
+
+17. CONFIG.HasCTRLTLAST = false
+作用：关闭 CTRL TLAST 端口。
+官方要求与本例说明：PG104 允许为 CTRL 通道选配 TLAST；本例已通过整数舍入启用 CTRL。本例不连接此可选端口，也不将其作为输出 TLAST 来源。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Channel-CTRL-Options
+
+18. CONFIG.HasCTRLTUSER = true
+作用：启用 CTRL TUSER 端口。
+官方要求与本例说明：PG104 允许为 CTRL 通道选配 TUSER；本例已启用 CTRL。用户标记输入为 0。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Channel-CTRL-Options
+
+19. CONFIG.CTRLTUSERWidth = 3
+作用：设置 CTRL TUSER 为 3 位。
+官方要求与本例说明：PG104 允许指定该位宽；安装版范围 1–256 位，本例 3 位在范围内，输入 0 可表示。
+官方链接：
+https://docs.amd.com/r/en-US/pg104-cmpy/Channel-CTRL-Options
+
+三、数学预期、接口及测试条件
+
+1. 输入与输出精度
+输入及输出采用二补码有符号整数。
+A 范围 [-8388608, 8388607]，B 范围 [-128, 127]，有效输入均在范围内。
+输出减少 1 个低位，选择 Random_Rounding，ROUND_CY=0。
+预期输出为 -1+j3，均可用 32 位有符号整数表示；公式及代入见案例介绍。
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/Output-Product-Range
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/Rounding
+
+2. 数据打包与读取
+PG104 规定实部在低位，虚部从其后的字节边界开始。
+A 实部 [23:0]、虚部 [47:24]；
+B 实部 [7:0]、虚部 [15:8]。
+输出总线为 64 位，读取实部 [31:0]、虚部 [63:32]，
+使用 $signed 解释有效字段，不将填充位作为算术位。
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/TDATA-Structure-for-A-B-and-DOUT-Channels
+CTRL TDATA 为 8 位，bit0=0 控制舍入，其余位为 0；PG104 允许静态 ROUND_CY。
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/TDATA-Structure-for-CTRL-Channel
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/Rounding
+
+3. 有效事务与时序
+所有相关输入 TVALID 同时有效一个周期，随后撤销；只在输出 TVALID=1 时比较。
+复位保持 50 周期，释放后等待 20 周期再提交输入。
+输入与复位在下降沿改变，上升沿接收；时钟周期 10ns。
+A、B 输入接收后分别改为无效数据 0+j0、0+j0，不会提交第二次运算。
+各输入通道的 TVALID 仅同时有效一个周期，仅提交一组运算；测试台等待一次有效输出并比较。
+接收到唯一输出后继续观察 100 周期；100us 看门狗只防止无限等待。
+上述激励时长为测试安排，不代表官方规定的唯一取值。
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/NonBlocking-Mode
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/Resets
+
+4. 用户标记和帧结束标志
+A TUSER 15 位，输入置 0；B TUSER 关闭；CTRL TUSER 3 位，输入置 0。
+A_TLAST=1、B_TLAST=0，按 AND_all_TLASTs 得到 TLAST=0，与实际一致。
+TLAST 独立检查，不计入乘积 mismatches；没有启用的标志不参与组合。
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/Output-TLAST-Behavior
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/TUSER-Options
+
+5. 参考模型与数学交叉核对
+参考模型直接位于 tb_complex_multiplier.sv 中，包含 quantize_product 函数和
+reference_multiply 任务。配置常量 A_W、B_W、OUT_W、USE_ROUNDING
+与 XCI 一致。模型按字节对齐规则提取输入有效字段，先符号扩展，再进行运算。
+计算宽度为 A_W+B_W+2，覆盖完整乘积并为舍入偏置留出一位；不使用 real 或 64 位 longint。
+完整实部为 ar*br-ai*bi，完整虚部为 ar*bi+ai*br。
+设 d=A_W+B_W+1-OUT_W：全精度直接保留结果；截断相当于 floor(P/2^d)；
+Random_Rounding 相当于 floor((P+2^(d-1)-1+ROUND_CY)/2^d)。
+代码使用有符号算术右移实现去低位，避免负数整数除法向零截断造成的差异。
+模型从实际接收的事务计算预期，不以 IP 运算结果、内部信号或延迟值推导预期。
+本测试只发送一次 NonBlocking 运算：三个输入 TVALID 同时有效一个周期，
+模型在接收上升沿计算并保存预期值，随后撤销输入有效信号。
+测试台等待 IP 的输出 TVALID 有效，在上升沿读取结果并比较；不按固定延迟采样。
+模型的适用范围为本案例的整数复数乘法、单事务和持续时钟使能；不包含浮点、
+累加、时钟使能暂停或多事务队列验证。更改 IP 配置时须同步核对模型配置常量。
+案例介绍中的手算独立列出本次输入的完整乘积和量化结果；CMPY_REFERENCE_ 日志
+展示模型计算的相同中间量，便于核验模型。该交叉核对不等于证明所有输入和配置。
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/Output-Product-Range
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/Rounding
+官方链接：https://docs.amd.com/r/en-US/pg104-cmpy/TDATA-Structure-for-A-B-and-DOUT-Channels
+
+四、随附工程和仿真命令
+
+工程名：complex_multiplier_case。
+工程入口：case_project/complex_multiplier_case.xpr。
+器件：xcu250-figd2104-2L-e；需安装对应器件支持。
+IP 配置：case_project/ip/complex_multiplier_0/complex_multiplier_0.xci。
+IP VLNV：xilinx.com:ip:cmpy:6.0；模块名：complex_multiplier_0。
+测试台：case_project/tb_complex_multiplier.sv。
+工程文件引用以上源文件的相对路径，无需原测试机器上的 E 盘目录。
+
+工程使用以下仿真设置，打开后无需在 Tcl Console 重新设置：
+1. simulator_language=Mixed：允许混合语言仿真。
+2. sim.use_ip_compiled_libs=false：从安装的官方 IP 源文件编译仿真库。
+3. sim_1 的 top=tb_complex_multiplier：以测试台作为仿真顶层。
+4. xsim.elaborate.debug_level=typical：保留波形观察所需的调试能力。
+5. xsim.elaborate.mt_level=off：关闭多线程展开。
+6. xsim.simulate.runtime=all：运行至测试台结束或报超时。
+7. xsim.simulate.custom_tcl 指向工程内的 waves.tcl，使用相对仿真运行目录的路径 ../../../../waves.tcl。
+   对应工程默认的 complex_multiplier_case.sim/sim_1/behav/xsim 运行目录。
+   脚本在 run all 前记录 IP 实际端口和模型最终预期值，创建分组波形，
+   运行结束后保存布局。仅 expected_re、expected_im 为模型信号，采用有符号十进制；
+   IP 数据总线采用十六进制。波形不显示模型中间量、计数器或测试台辅助信号。
+   波形数据库及 cmpy_wave.wcfg 布局由本次仿真生成，不需要另一份测试台。
+   脚本仅设置观察与运行方式，不修改输入、IP 参数或参考模型。
+官方仿真选项说明：
+https://docs.amd.com/r/en-US/ug900-vivado-logic-simulation/Vivado-Simulator-Simulation-Options
+这些属性用于本案例的 Vivado 2026.1 行为仿真，不属于 IP 算术 CONFIG 参数。
+官方属性设置命令说明：
+https://docs.amd.com/r/en-US/ug835-vivado-tcl-commands/set_property
+
+打开 .xpr 工程后只需执行：
+generate_target simulation [get_ips complex_multiplier_0]
+作用：根据已保存的配置，生成该 IP 的仿真目标文件。
+simulation 为 generate_target 支持的目标类型。
+官方链接：https://docs.amd.com/r/en-US/ug835-vivado-tcl-commands/generate_target
+
+launch_simulation -simset sim_1 -mode behavioral
+作用：编译、展开并运行 sim_1 的行为仿真，使用工程已保存的顶层与运行时长。
+官方链接：https://docs.amd.com/r/en-US/ug835-vivado-tcl-commands/launch_simulation
+
+测试台的 mismatch 记录本次有效输出的比较结果；另保留超时及额外输出检查。
+测试台的输入序列、数值打包和检查语句均保留中文注释，可直接在 Vivado 中查看。

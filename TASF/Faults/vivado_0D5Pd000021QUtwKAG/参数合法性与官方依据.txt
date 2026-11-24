@@ -1,0 +1,163 @@
+一、公开资料与取值依据
+
+公开依据为 AMD PG099 v4.1；本次访问的官方页面标注发布日期为 2021-07-15。
+核查日期：2026-10-22。文档发布日期与安装版 IP 修订号分别记录。
+本例使用 Vivado 2026.1 随附的 AXI Interrupt Controller 4.1 Rev.23；IP 状态为 Up-to-date。
+官方手册：https://docs.amd.com/v/u/en-US/pg099-axi-intc
+官方 PDF：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content
+下列链接的 page 数字为 PDF 页码；也可在手册中按寄存器名或参数名定位。
+
+以下逐项对应工程明确设置的 22 个 IP 参数。
+参数取值已与保存的 XCI、生成的 model_parameters 及 Vivado 回读结果核对。
+GUI 选项和依赖条件另依据 AMD 随 Vivado 2026.1 交付的文件：
+data/ip/xilinx/axi_intc_v4_1/component.xml
+data/ip/xilinx/axi_intc_v4_1/xgui/axi_intc_v4_1.tcl
+这两个路径相对于 Vivado 安装目录。参数枚举和 GUI 映射依据上述安装文件，公开手册依据对应链接。
+
+二、逐项参数说明
+
+CONFIG.C_NUM_INTR_INPUTS = 4
+作用：硬件中断输入数量。
+官方要求与本例说明：PG099 表 2-2 规定 1–32；本例为 4。硬件与专用软件中断合计 8 路，不超过 32。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=11
+
+CONFIG.C_NUM_SW_INTR = 4
+作用：专用软件中断数量，编号接在硬件中断之后。
+官方要求与本例说明：PG099 表 2-2 规定 0–31；安装版 update_PARAM_VALUE.C_NUM_SW_INTR 将上限设为 32-C_NUM_INTR_INPUTS。本例 4≤28。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=12
+
+CONFIG.C_KIND_OF_INTR = 0x00000005
+作用：逐路选择硬件输入的边沿或电平触发类型。
+官方要求与本例说明：PG099 表 2-2 按位定义 1=边沿、0=电平。只配置已实现输入对应的位；本例具体分配为：上升沿：编号 0；下降沿：编号 2；高有效电平：编号 3；低有效电平：编号 1。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=11
+
+CONFIG.C_KIND_OF_EDGE = 0x00000001
+作用：设置边沿触发输入的方向。
+官方要求与本例说明：PG099 表 2-2 定义 1=上升沿、0=下降沿，仅在 C_KIND_OF_INTR 对应位为 1 时使用。testbench 的 RISING_MASK 与此值一致；下降沿输入从高电平开始，不在初始化时产生目标边沿。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=11
+
+CONFIG.C_ASYNC_INTR = 0x0000000F
+作用：逐路选择外设输入的同步链。
+官方要求与本例说明：PG099 规定 0=同步、1=异步；置 1 的硬件输入使用 C_NUM_SYNC_FF 级同步。掩码未超出已实现的输入范围；这与处理器时钟的 C_ENABLE_ASYNC 分别配置。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=10
+
+CONFIG.C_NUM_SYNC_FF = 4
+作用：外设异步输入的同步级数。
+官方要求与本例说明：PG099 表 2-2 和安装版 component.xml 均允许 0–7；本例为 4。该级数用于 C_ASYNC_INTR 置 1 的输入；状态比较前保留 32 个 AXI 时钟周期等待。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=12
+
+CONFIG.C_IRQ_IS_LEVEL = 1
+作用：配置 IRQ 为电平有效输出。
+官方要求与本例说明：PG099 表 2-2 允许 0=边沿、1=电平；本例为 1。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=11
+
+CONFIG.Sense_of_IRQ_Level_Type = Active_High
+作用：选择 IRQ 有效电平。
+官方要求与本例说明：安装版 component.xml 枚举为 Active_High、Active_Low；xgui 的 update_MODELPARAM_VALUE.C_IRQ_ACTIVE 将本例选项转换为生成参数 C_IRQ_ACTIVE=1。PG099 表 2-2 对应定义为 0=低有效、1=高有效。已核对生成的 model_parameters 与仿真端口极性。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=11
+
+CONFIG.C_HAS_IPR = 1
+作用：IPR 待处理中断寄存器。
+官方要求与本例说明：PG099 表 2-2 允许 0=不包含、1=包含。本例包含该寄存器。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=17
+
+CONFIG.C_HAS_IVR = 1
+作用：IVR 中断编号寄存器。
+官方要求与本例说明：PG099 表 2-2 允许 0=不包含、1=包含。本例包含该寄存器。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=22
+
+CONFIG.C_HAS_SIE = 0
+作用：SIE 原子置位使能寄存器。
+官方要求与本例说明：PG099 表 2-2 允许 0=不包含、1=包含。本例不包含该寄存器，也不访问它。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=20
+
+CONFIG.C_HAS_CIE = 1
+作用：CIE 原子清除使能寄存器。
+官方要求与本例说明：PG099 表 2-2 允许 0=不包含、1=包含。本例包含该寄存器。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=21
+
+CONFIG.C_HAS_ILR = 1
+作用：ILR 中断级别寄存器。
+官方要求与本例说明：PG099 表 2-2 允许 0=不包含、1=包含。本例包含该寄存器。 ILR 保持复位值 0xFFFFFFFF，不屏蔽任何优先级；测试没有写入 ILR。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=25
+
+CONFIG.C_HAS_FAST = 1
+作用：配置是否生成快速中断硬件。
+官方要求与本例说明：PG099 表 2-2 允许 0/1；表 2-3 明确要求 C_HAS_FAST=1 时，C_MB_CLK_NOT_CONNECTED 和 C_IRQ_CONNECTION 均为 0。本例生成值为 C_HAS_FAST=1、C_MB_CLK_NOT_CONNECTED=0、C_IRQ_CONNECTION=0，并连接 processor_clk、processor_rst、processor_ack 和 interrupt_address。IMR 保持 0，本次使用普通中断模式；参数组合仍满足快速中断硬件的依赖条件。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=13
+
+CONFIG.C_ENABLE_ASYNC = 1
+作用：配置 AXI 与处理器时钟之间的同步方式。
+官方要求与本例说明：安装版定义为 0/1。本例为 1，xgui 自动生成 C_MB_CLK_NOT_CONNECTED=0、C_DISABLE_SYNCHRONIZERS=0，启用 AXI 与处理器时钟域之间的同步。s_axi_aclk 为 80 MHz，processor_clk 由 testbench 独立驱动为 40 MHz，processor_rst 为高有效。生成值同时满足 PG099 第 13 页 C_HAS_FAST=1 时的时钟连接参数要求。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=28
+
+CONFIG.C_EN_CASCADE_MODE = 0
+作用：不使用级联。
+官方要求与本例说明：PG099 表 2-2 允许 0/1；本例为 0，C_CASCADE_MASTER 保持 0。不存在关闭级联却配置为级联主节点的组合。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=12
+
+CONFIG.C_KIND_OF_LVL = 0x00000008
+作用：设置电平触发输入的有效极性。
+官方要求与本例说明：PG099 表 2-2 定义 1=高有效、0=低有效，仅在 C_KIND_OF_INTR 对应位为 0 时使用。testbench 的 HIGH_MASK 与此值一致；未触发的电平输入保持非有效电平。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=11
+
+CONFIG.C_S_AXI_ACLK_FREQ_MHZ = 80
+作用：设置AXI时钟的独立综合约束频率。
+官方要求与本例说明：直接依据为安装版 component.xml 的该参数及 xgui 的 Clocks 页说明，用于 out-of-context 综合时钟约束；不代表 IP 内部自动产生时钟。安装定义未列出数值 minimum/maximum。testbench 实际驱动频率与此值一致。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=41
+
+CONFIG.C_IRQ_CONNECTION = 0
+作用：选择中断输出接口形式。
+官方要求与本例说明：PG099 表 2-2 定义 0=Bus、1=Single；本例取 0。本例选择 Bus 接口形式；开启快速中断硬件时也符合安装版接口联动条件。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=12
+
+CONFIG.C_ADDR_WIDTH = 32
+作用：设置快速中断向量地址端口的位宽。
+官方要求与本例说明：PG099 表 2-2 及安装版 component.xml 允许 32–64 位；本例为 32 位，C_HAS_FAST=1。此参数是 interrupt_address 位宽，不是 AXI 数据宽度。生成端口位宽已核对。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=12
+
+CONFIG.C_IVAR_RESET_VALUE = 0x0000000080000010
+作用：设置中断向量地址寄存器的复位值。
+官方要求与本例说明：直接依据为安装版 component.xml 的 64 位 bitString 定义及 xgui 的 C_HAS_FAST 启用条件。本例值为 0x0000000080000010，未超出 32 位地址范围，并按 4 字节对齐。配置界面说明 MicroBlaze 常用值为 C_BASE_VECTORS+0x10；本例采用对应的自定义向量基址。该测试不执行处理器跳转，未验证该地址对应的程序。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=36
+
+CONFIG.C_PROCESSOR_CLK_FREQ_MHZ = 40
+作用：设置处理器时钟的独立综合约束频率。
+官方要求与本例说明：直接依据为安装版 component.xml 的该参数及 xgui 的 Clocks 页说明，用于 out-of-context 综合时钟约束；不代表 IP 内部自动产生时钟。安装定义未列出数值 minimum/maximum。testbench 实际驱动频率与此值一致。安装版仅在 C_HAS_FAST=1 时启用该选项，本例满足。
+官方链接：https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=41
+
+三、组合条件及测试访问合法性
+
+上升沿：编号 0；下降沿：编号 2；高有效电平：编号 3；低有效电平：编号 1。
+AXI 时钟为 80 MHz，testbench 按相同频率驱动。启用快速中断硬件，向量地址宽度为 32 位，复位地址为 0x0000000080000010；处理器时钟为独立的 40 MHz，启用 AXI 与处理器时钟域之间的同步。IMR 保持复位值 0，并在初始化时读回核对，因此本次中断按普通模式处理；processor_ack 保持 00，结束时通过 IAR 确认。
+未触发时 intr=0x00000006；输入的非有效电平由上述触发类型决定。
+输入触发类型、方向、有效电平以及时钟驱动已与 testbench 对照；参考模型按相应有效边沿/电平更新，硬件事件与软件写事务分开执行。
+IMR 初始读回为 0；目标过程不写 IMR，不发送快速处理器确认，不执行向量跳转。本例仅验证该配置下的普通中断 ISR 行为。
+C_HAS_FAST=1、C_MB_CLK_NOT_CONNECTED=0、C_IRQ_CONNECTION=0，符合 PG099 表 2-3 的联动要求。
+时钟频率项用于独立综合约束，本次验证范围为行为仿真。
+
+硬件 4 路、专用软件 4 路，总计 8 路，满足总数不超过 32 的限制。
+本例 MER.HIE=1，MER.ME=1。
+HIE 从 0 置 1 后不再修改。专用软件中断位范围为 bit4 至 bit7；
+两次 ISR 写入的非零位均位于该范围。硬件位未通过软件写 1 强行置位。
+官方依据：PG099 ISR（第 16 页）、MER（第 23 页）、Programming Sequence（第 28 页）。
+https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=16
+https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=23
+https://docs.amd.com/api/khub/documents/ESm7csywkGnmDhvqT3ZVDw/content#page=28
+
+AXI 数据宽度为 32 位，地址宽度为 9 位，符合 PG099 表 2-2；本例访问地址均按 4 字节对齐。
+写入使用全部字节选通 WSTRB=0xF；驱动值在对应握手前保持，完成写响应后再进行下一事务。
+复位保持 32 个时钟周期，释放后等待 32 拍。硬件输入只在时钟下降沿改变。
+IMR 保持普通模式且未启用级联，未访问关闭的可选寄存器，未在目标观测区间通过 IAR 清除旧状态。
+初始化、目标写入与结束确认分开执行；不存在同时复位、确认清除或改写使能影响目标读回的情况。
+本例不注入外部硬件中断；输入触发及同步参数保留为具体应用配置。
+ILR 保持复位值 0xFFFFFFFF。按第 25 页的规则，该值允许全部中断优先级，不会屏蔽编号 4。
+
+四、验证方法的适用范围
+
+预期由 testbench 中独立参考状态计算，并可用案例介绍中的按位或运算直接复核。
+可写位限制、IAR 确认清除、IER 使能和 MER 控制分别建模；只在 AXI 有效读传输时比较数据。
+模型没有通过实际输出反推预期，没有修改官方生成的 HDL，也没有 force DUT 信号。
+本例的时钟、激励、等待周期、模型变量及波形脚本属于测试环境设置，不是 IP 配置参数。
+已核对上述配置与操作符合所引用的官方规则，并在当前安装版重新生成后复现差异；
+本次结论限于所列行为仿真场景。

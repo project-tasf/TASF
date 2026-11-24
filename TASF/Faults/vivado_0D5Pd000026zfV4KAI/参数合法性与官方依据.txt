@@ -1,0 +1,174 @@
+﻿参数合法性与官方依据
+
+适用工程：随附case_project/fir_case.xpr。
+公开依据：AMD PG149 7.2（已核对页面发布日期2026-07-22）。核对日期：2026-11-14。
+以下逐项对应案例介绍中的IP配置。参数用途和使用条件引用产品手册；明确标为“安装版定义”的数值范围及枚举来自Vivado 2026.1 data/ip/xilinx/fir_compiler_v7_2/component.xml。
+工程的仿真运行记录及提示说明见本文末尾。
+
+CONFIG.Filter_Type = Single_Rate
+作用：滤波器类型。
+官方定义/使用条件：PG149支持单速率、插值、抽取、Hilbert及插零滤波类型。
+要求与核对：安装版定义允许值：Single_Rate, Interpolation, Decimation, Hilbert, Interpolated。XCI保存值为Single_Rate，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Filter-Options-Tab
+
+CONFIG.Number_Channels = 1
+作用：交织数据通道数。
+官方定义/使用条件：Basic通道序列从通道0开始依次处理各通道。
+要求与核对：安装版定义范围：1～1024。XCI保存值为1，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Channel-Specification-Tab
+
+CONFIG.Number_Paths = 1
+作用：并行数据路径数。
+官方定义/使用条件：每条并行路径独立扩展到字节边界；路径数与交织通道数是不同概念。
+要求与核对：安装版定义范围：1～16。XCI保存值为1，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Channel-Specification-Tab
+
+CONFIG.Filter_Architecture = Systolic_Multiply_Accumulate
+作用：滤波器乘加实现架构。
+官方定义/使用条件：本例使用Systolic架构；Transpose不支持多交织通道的限制不适用于本例。
+要求与核对：安装版定义允许值：Systolic_Multiply_Accumulate, Transpose_Multiply_Accumulate。XCI保存值为Systolic_Multiply_Accumulate，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Notable-Limitations?contentId=_v659ARTy3LatS_KduYDfg
+
+CONFIG.Data_Width = 8
+作用：输入样本有效位宽。
+官方定义/使用条件：输入类型为Signed时按常规补码解释；有效数据位宽与AXI字节容器位宽分别核对。
+要求与核对：安装版定义范围：1～49。XCI保存值为8，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Implementation-Tab
+
+CONFIG.Data_Sign = Signed
+作用：输入样本的有符号/无符号类型。
+官方定义/使用条件：Signed采用常规二进制补码。
+要求与核对：安装版定义允许值：Signed, Unsigned。XCI保存值为Signed，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Implementation-Tab
+
+CONFIG.Data_Fractional_Bits = 0
+作用：输入样本小数位数。
+官方定义/使用条件：与系数小数位共同决定输出的小数位解释；本例为整数数据。
+要求与核对：安装版定义范围：0～16。XCI保存值为0，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Implementation-Tab
+
+CONFIG.Coefficient_Width = 4
+作用：系数有效位宽。
+官方定义/使用条件：有符号系数须能够以设定位宽完整表示。
+要求与核对：安装版定义范围：1～49。XCI保存值为4，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Implementation-Tab
+
+CONFIG.CoefficientVector = -8,0,0,0
+作用：按tap顺序给出的系数向量。
+官方定义/使用条件：系数可通过逗号分隔的十进制向量指定；整数系数使用Integer Coefficients。
+要求与核对：安装版未在该节点提供可直接列出的上下界；本项采用官方公开设置形式，并核对实际保存值。XCI保存值为-8,0,0,0，与请求一致。全部4个系数均在4位有符号补码范围内。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Filter-Options-Tab
+
+CONFIG.SamplePeriod = 8
+作用：时分复用输入流的样本周期，单位为时钟周期。
+官方定义/使用条件：Input Sample Period指定输入样本间的时钟周期数；多通道时对应交织后的输入流。
+要求与核对：安装版定义范围：1～10000000。XCI保存值为8，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Channel-Specification-Tab
+
+CONFIG.Optimization_Goal = Area
+作用：实现优化目标。
+官方定义/使用条件：本例选择工具支持的Area设置；该设置不改变所要求的数学滤波结果。
+要求与核对：安装版定义允许值：Area, Speed, Custom。XCI保存值为Area，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Detailed-Implementation-Tab
+
+CONFIG.Has_ACLKEN = false
+作用：可选时钟使能端口开关。
+官方定义/使用条件：未生成ACLKEN时不需在测试台连接该端口。
+要求与核对：安装版定义为布尔值，允许false/true。XCI保存值为false，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Interface-Tab
+
+CONFIG.Has_ARESETn = true
+作用：低有效复位端口开关。
+官方定义/使用条件：生成复位端口后按复位使用条件驱动，不在复位有效期间接收输出。
+要求与核对：安装版定义为布尔值，允许false/true。XCI保存值为true，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Interface-Tab
+
+CONFIG.M_DATA_Has_TREADY = false
+作用：输出流TREADY端口开关。
+官方定义/使用条件：本例未生成输出TREADY端口，接收端持续接收，仅在输出TVALID有效的时钟上升沿比较。
+要求与核对：安装版定义为布尔值，允许false/true。XCI保存值为false，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Interface-Tab
+
+CONFIG.CoefficientSource = Vector
+作用：系数来源。
+官方定义/使用条件：Vector方式使用直接提供的系数向量；File方式才依赖外部COE文件。
+要求与核对：安装版定义允许值：COE_File, Vector。XCI保存值为Vector，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Filter-Options-Tab
+
+CONFIG.Coefficient_Structure = Non_Symmetric
+作用：系数结构优化方式。
+官方定义/使用条件：Non-Symmetric允许按一般乘加实现，避免利用对称性时的前置补零；尾部补零不改变常量稳态增益。
+要求与核对：安装版定义允许值：Inferred, Non_Symmetric, Symmetric, Negative_Symmetric, Half_Band, Hilbert。XCI保存值为Non_Symmetric，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Coefficient-Padding
+
+CONFIG.RateSpecification = Input_Sample_Period
+作用：输入/输出速率的指定方式。
+官方定义/使用条件：本例使用Input Sample Period形式指定输入处理能力。
+要求与核对：安装版定义允许值：Frequency_Specification, Input_Sample_Period, Output_Sample_Period, Maximum_Possible, Hardware_Oversampling_Rate。XCI保存值为Input_Sample_Period，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Channel-Specification-Tab
+
+CONFIG.Output_Rounding_Mode = Full_Precision
+作用：输出舍入和精度方式。
+官方定义/使用条件：Full Precision不再缩减累加器输出位宽；自动位宽仍须按实际生成值核对。
+要求与核对：安装版定义允许值：Full_Precision, Truncate_LSBs, Non_Symmetric_Rounding_Down, Non_Symmetric_Rounding_Up, Symmetric_Rounding_to_Zero, Symmetric_Rounding_to_Infinity, Convergent_Rounding_to_Even, Convergent_Rounding_to_Odd, Floating_Point_Standard。XCI保存值为Full_Precision，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Full-Precision
+
+CONFIG.Decimation_Rate = 1
+作用：抽取倍率。
+官方定义/使用条件：Decimation配置按该倍率降低输出采样率；Single_Rate配置中本项不启用抽取。
+要求与核对：安装版定义范围：1～1024。XCI保存值为1，与请求一致。本例为Single_Rate，保存1不表示启用了抽取。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Filter-Options-Tab
+
+CONFIG.Quantization = Integer_Coefficients
+作用：系数量化方式。
+官方定义/使用条件：Integer Coefficients适用于全部为整数的系数向量。
+要求与核对：安装版定义允许值：Integer_Coefficients, Quantize_Only, Maximize_Dynamic_Range, Normalize_to_Centre_Coefficient, Floating_Point_Coefficients。XCI保存值为Integer_Coefficients，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Implementation-Tab
+
+CONFIG.Reset_Data_Vector = false
+作用：复位时是否清除数据历史向量。
+官方定义/使用条件：本例不启用数据向量清除，测试通过常量填充并排除启动输出，避免依赖初始历史值。
+要求与核对：安装版定义为布尔值，允许false/true。XCI保存值为false，与请求一致。
+官方链接：https://docs.amd.com/r/en-US/pg149-fir-compiler/Resets
+
+保存的默认配置与派生结果
+
+CONFIG.Coefficient_Sign = Signed
+CONFIG.Coefficient_Fractional_Bits = 0
+CONFIG.Coefficient_Reload = false
+CONFIG.Coefficient_Sets = 1
+上列为本例XCI实际保存值，不是另外覆盖IP的testbench参数。系数和输入均为有符号整数，小数位为0；未启用系数重载。
+C_DATA_WIDTH=8，C_COEF_WIDTH=4，C_OUTPUT_WIDTH=11，C_M_DATA_TDATA_WIDTH=16。
+有效输出位宽与AXI字节容器位宽不同，比较时只取有效11位并按有符号补码解释。
+默认值定义及派生结果依据：https://docs.amd.com/r/en-US/pg149-fir-compiler/Implementation-Tab
+位增长依据：https://docs.amd.com/r/en-US/pg149-fir-compiler/Output-Width-and-Bit-Growth
+
+组合条件与接口使用
+
+本例使用Systolic Multiply-Accumulate、Non_Symmetric、1条并行路径，未采用Transpose、浮点、复数、超采样率或高级通道序列。
+输入端点-128及相邻值-127均可由8位有符号数表示；输入与系数小数位均为0，因此参考结果不涉及小数缩放。
+本例为单通道单速率，只有系数-8非零，端点结果可以直接按一次乘法核验。
+复位低保持32拍，释放后等待32拍。Reset_Data_Vector=false；每阶段用常量输入填充历史，前8个输出不参与比较。此处理用于排除启动历史，不把复位历史清除作为本例预期。
+输入VALID和DATA保持至READY握手；实际输入速率不超过所配置处理能力。输出未生成TREADY端口，持续接收，只在输出VALID有效的传输沿比较。
+PG149的抽取规则、通道序列及采样周期依据：
+https://docs.amd.com/r/en-US/pg149-fir-compiler/Channel-Specification-Tab
+https://docs.amd.com/r/en-US/pg149-fir-compiler/Polyphase-Decimator
+https://docs.amd.com/r/en-US/pg149-fir-compiler/AXI4-Stream-Considerations
+https://docs.amd.com/r/en-US/pg149-fir-compiler/Resets
+
+预期值依据与待确认边界
+
+常量稳态下，参考值为输入乘以系数和-8；端点数学结果为(-128)×(-8)=1024，相邻输入结果为1016。
+生成的11位有符号最大值为1023。当前位宽与手册现有位增长规则一致，但不能容纳上述正端点。
+Full Precision说明“不缩减累加器输出位宽”。希望协助确认该输入端点的适用限制，以及全精度位宽规则或文档说明是否需要调整。
+https://docs.amd.com/r/en-US/pg149-fir-compiler/Full-Precision
+https://docs.amd.com/r/en-US/pg149-fir-compiler/Output-Width-and-Bit-Growth
+
+本例现象来自Vivado 2026.1/XSim行为仿真。
+
+仿真运行与提示
+
+按案例介绍中的Tcl命令生成仿真文件、编译、展开并运行，工程自动生成逐笔记录和波形配置。
+正常对照结果及异常输出见案例介绍。
+打开工程时出现Project 1-5713（空BoardPart）提示；本工程按具体器件创建，未使用板卡预设，该提示不妨碍仿真完成。
+FIR的m_axis_data_tuser已连接到观察线，没有该输出未连接的VRFC 10-5021警告。
