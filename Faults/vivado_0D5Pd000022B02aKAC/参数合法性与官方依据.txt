@@ -1,0 +1,97 @@
+﻿一、公开资料与取值依据
+
+公开依据为 AMD PG258 v1.0；访问页面标注发布日期为 2025-08-28。核查日期：2026-10-26。
+本案例使用 Vivado 2026.1 随附的 AXI AMM Bridge 1.0 Rev.26。
+官方参数说明：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/User-Parameters
+配置说明：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/Customizing-and-Generating-the-Core
+
+以下逐项列出本例使用的 13 个配置项，已与生成时 XCI、Vivado 回读及生成模型参数核对。
+公开网页未列出的枚举值或联动范围，补充核对安装版官方文件：
+data/ip/xilinx/axi_amm_bridge_v1_0/component.xml
+data/ip/xilinx/axi_amm_bridge_v1_0/xgui/axi_amm_bridge_v1_0.tcl
+上述路径相对于 Vivado 安装目录。
+
+二、逐项参数说明
+
+CONFIG.C_PROTOCOL = 1
+作用：AXI 协议。
+官方要求与本例说明：0=AXI4-Lite，1=AXI4；本例使用 AXI4。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/Customizing-and-Generating-the-Core
+
+CONFIG.C_S_AXI_DATA_WIDTH = 32
+作用：AXI 与 Avalon 数据宽度。
+官方要求与本例说明：AXI4 模式允许 32、64、128、256、512、1024 位；两侧宽度相同，不使用升降宽。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/User-Parameters
+
+CONFIG.C_S_AXI_ADDR_WIDTH = 32
+作用：两侧地址宽度。
+官方要求与本例说明：AXI4 模式为 32～64 位；PG258 的 AXI4 Slave Interface 给出这一模式范围。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/AXI4-Slave-Interface
+
+CONFIG.C_S_AXI_ID_WIDTH = 1
+作用：AXI 事务 ID 宽度。
+官方要求与本例说明：PG258 范围为 0～32；本例启用 ID，激励使用可由本位宽表示的 ID=1。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/User-Parameters
+
+CONFIG.C_ADDRESS_MODE = 1
+作用：Avalon 地址单位。
+官方要求与本例说明：允许 Byte / Word Addressing。本例 1=Word；按每个数据字的字节数将 AXI 字节地址换算为字地址。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/Customizing-and-Generating-the-Core
+
+CONFIG.C_NUM_OUTSTANDING = 4
+作用：最多未完成读事务数。
+官方要求与本例说明：PG258 的 AXI4 接口说明最多支持 4 笔未完成读事务；安装版参数范围为 1～4。本例实际只发出一笔读事务，不发出并行写事务。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/AXI4-Slave-Interface
+
+CONFIG.C_HAS_WAIT_REQUEST = 1
+作用：Avalon 等待握手。
+官方要求与本例说明：允许启用 waitrequest；安装版 AXI4 配置要求此项为 1。本例从设备在复位时等待，业务期间可以接收命令。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/Customizing-and-Generating-the-Core
+
+CONFIG.C_HAS_READ_DATA_VALID = 1
+作用：Avalon 读返回有效握手。
+官方要求与本例说明：安装版 AXI4 配置要求此项为 1；从设备在接受读命令后的下一周期提供有效数据，符合 Avalon 可变延迟读协议。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/Customizing-and-Generating-the-Core
+
+CONFIG.C_HAS_RESPONSE = 1
+作用：Avalon 响应端口。
+官方要求与本例说明：允许 0/1；启用时转换从设备响应，关闭时由桥生成 AXI 响应。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/User-Parameters
+
+CONFIG.C_USE_BYTEENABLE = 1
+作用：Avalon 字节使能端口。
+官方要求与本例说明：允许 0/1；每一位对应一个数据字节。本例进行整字访问，AXI WSTRB 全为 1；关闭字节使能时也不要求部分字写入。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/User-Parameters
+
+CONFIG.C_BURST_SUPPORT = 1
+作用：Avalon burstcount 端口。
+官方要求与本例说明：允许 0/1；安装版 AXI4 模式要求启用。本例 AXI LEN=0，即一次传输一拍。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/User-Parameters
+
+CONFIG.C_AVM_BURST_WIDTH = 1
+作用：Avalon burstcount 位宽。
+官方要求与本例说明：PG258 范围为 1～11。Avalon 的 n 位计数支持最多 2^(n-1) 拍；本例仅 1 拍，未超出其容量。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/User-Parameters
+
+CONFIG.C_BEGIN_BURST_TRANSFER = 0
+作用：Avalon 开始突发指示端口。
+官方要求与本例说明：允许关闭；若启用，须先启用 burstcount。本例为 0。安装版回调和 Avalon 兼容性说明也已核对。
+官方链接：https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/Customizing-and-Generating-the-Core
+
+三、组合条件与接口使用
+
+AXI4 模式的两侧数据位宽一致，地址位宽为 32；waitrequest、readdatavalid 和 burstcount 均启用。
+AXI 输入为按 4 字节对齐的单拍 INCR 事务，地址 0x24，不跨越 4KB 边界，不使用窄传输、独占访问或并行未完成写事务。
+Avalon 采用字地址单位；地址位宽大于等于 burstcount 位宽。一次一拍也符合本例计数位宽的容量。
+从设备在命令接受后的下一周期提供读数据或写响应；读、写依次执行，不在同周期返回两种响应。
+AXI 与 Avalon 由同一个 100 MHz 时钟驱动，低有效复位保持 32 个周期。地址比较仅在 Avalon 接受命令时进行。
+官方链接：
+https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/Unsupported-Features
+https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/AXI4-Slave-Interface
+https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/Resets
+https://docs.amd.com/r/en-US/pg258-axi-amm-bridge/References
+https://docs.altera.com/r/docs/683609/26.1/quartus-prime-pro-edition-user-guide-platform-designer/avalon-memory-mapped-interface-signal-roles
+https://docs.amd.com/v/u/en-US/ug1037-vivado-axi-reference-guide
+
+预期地址直接来自 PG258 的 Word Addressing 定义；独立模型以除法实现同一规则。
+本例报告的是行为仿真中的地址转换差异，不据此声称已验证硬件上的表现。

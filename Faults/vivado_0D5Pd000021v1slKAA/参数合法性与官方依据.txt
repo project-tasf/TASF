@@ -1,0 +1,156 @@
+﻿一、资料依据
+
+公开依据为 AMD System Cache Product Guide（PG118），版本 5.0，网页标注发布日期 2024-12-09。接口组合另核对 PG213；仿真流程核对 UG900 2026.1。
+各项取值同时与 Vivado 2026.1 随附的 data/ip/xilinx/system_cache_v5_0/component.xml、xgui/system_cache_v5_0.tcl 核对。安装文件用于确认实际枚举、界面使能条件和自动派生关系。
+
+二、逐项参数说明
+
+C_NUM_OPTIMIZED_PORTS = 1（优化型 AXI 从接口数量）
+官方定义及约束：允许 0～16；CCIX/CHI 不提供此类接口。本例使用非一致性 AXI 模式。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/System-Cache-Parameters
+
+C_NUM_GENERIC_PORTS = 16（通用 AXI 从接口数量）
+官方定义及约束：允许 0～16；CCIX/CHI 下另限为 1～4。本例未启用这两种一致性协议。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/System-Cache-Parameters
+
+C_ENABLE_ADDRESS_TRANSLATION = 1（地址转换服务）
+官方定义及约束：允许 0/1；1 选择 ATS 地址转换功能。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/ATC-Parameters-Tab
+
+C_CACHE_SIZE = 32768（缓存容量）
+官方定义及约束：允许 32768～4194304 字节范围内列出的 2 的幂；本例为 32 KiB。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Core-Parameters-Tab
+
+C_NUM_WAYS = 2（组相联路数）
+官方定义及约束：公开手册允许 2 或 4。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Core-Parameters-Tab
+
+C_CACHE_LINE_LENGTH = 16（缓存行长度）
+官方定义及约束：允许 16、32、64、128、256、512、1024 个 32 位字；本例每行 64 字节。ACE/CCIX/CHI 主一致性模式固定为 16，本例未启用这些模式。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Core-Parameters-Tab
+
+C_M0_AXI_DATA_WIDTH = 32（AXI 主接口数据位宽）
+官方定义及约束：公开枚举为 32、64、128、256、512 位；存在优化型接口时，本安装版允许 32、128、256、512。本例取值属于两者交集。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Memory-Controller-AXI4-Master-Interface-Parameters
+
+C_S0_AXI_DATA_WIDTH = 32（优化型从接口数据位宽）
+官方定义及约束：允许 32、128、256、512 位；本例 32 位，不大于主接口 32 位，且对应接口已启用。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/MicroBlaze-Processor-Cache-Optimized-AXI4-Slave-Interface-Parameters
+
+C_S0_AXI_GEN_DATA_WIDTH = 32（通用从接口数据位宽）
+官方定义及约束：允许 32、64、128、256、512 位；本例 32 位，不大于主接口 32 位，且对应接口已启用。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Generic-AXI4-Slave-Interface-Parameters
+
+C_S15_AXI_GEN_DATA_WIDTH = 32（通用从接口数据位宽）
+官方定义及约束：允许 32、64、128、256、512 位；本例 32 位，不大于主接口 32 位，且对应接口已启用。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Generic-AXI4-Slave-Interface-Parameters
+
+C_CACHE_TAG_MEMORY_TYPE = 1（Tag 存储类型）
+官方定义及约束：0=自动、1=LUTRAM、2=BRAM、3=URAM；Data 不允许 LUTRAM。URAM 要求 UltraScale+ 器件，本例 xcu250 属于该系列。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Cache-Memory
+
+C_CACHE_DATA_MEMORY_TYPE = 2（Data 存储类型）
+官方定义及约束：0=自动、1=LUTRAM、2=BRAM、3=URAM；Data 不允许 LUTRAM。URAM 要求 UltraScale+ 器件，本例 xcu250 属于该系列。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Cache-Memory
+
+C_CACHE_LRU_MEMORY_TYPE = 1（LRU 存储类型）
+官方定义及约束：0=自动、1=LUTRAM、2=BRAM、3=URAM；Data 不允许 LUTRAM。URAM 要求 UltraScale+ 器件，本例 xcu250 属于该系列。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Cache-Memory
+
+C_ENABLE_EXCLUSIVE = 1（独占访问监视）
+官方定义及约束：允许 0/1；非一致性模式可启用。本例主、从一致性均关闭，符合 Protocol Parameters Tab 的联动要求。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Protocol-Parameters-Tab
+
+C_ENABLE_NON_SECURE = 0（安全与非安全访问区分）
+官方定义及约束：允许 0/1；控制是否区分并缓存 Secure / Non-Secure 事务。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Protocol-Parameters-Tab
+
+C_ENABLE_ERROR_HANDLING = 1（AXI 错误处理）
+官方定义及约束：允许 0/1；启用时，AXI 错误响应会阻止缓存行分配。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Protocol-Parameters-Tab
+
+C_ENABLE_CTRL = 1（控制与统计接口）
+官方定义及约束：允许 0/1；控制是否提供 AXI4-Lite 控制接口。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Control-Parameters-Tab
+
+C_ENABLE_STATISTICS = 131（统计组选择）
+官方定义及约束：允许 0～255 的 8 位掩码。本例 0x83，控制接口已启用。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/System-Cache-Parameters
+
+C_ENABLE_VERSION_REGISTER = 1（版本寄存器级别）
+官方定义及约束：允许 0=None、1=Basic、2=Full；本例控制接口已启用。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/Control-Parameters-Tab
+
+C_ATS0_DATA_WIDTH = 256（ATS 流接口数据位宽）
+官方定义及约束：本例 UltraScale+ 器件使用 256/512 位选项；1024 位仅供对应 Versal Premium 场景，本例不使用。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/AXI4-Stream-ATS-Interfaces
+
+C_ATS0_CQ_CC_ALIGNMENT_MODE = 0（CQ/CC 对齐模式）
+官方定义及约束：允许 0=DWORD 对齐、1=地址对齐；CQ/CC 可与 RQ/RC 独立选择。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/ATS-Interface
+
+C_ATS0_RQ_RC_ALIGNMENT_MODE = 0（RQ/RC 对齐模式）
+官方定义及约束：允许 0=DWORD 对齐、1=地址对齐；RQ 与 RC 使用相同模式。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/ATS-Interface
+
+C_ATS0_RQ_RC_STRADDLE = 1（RC 或 RQ/RC 帧交叠传输）
+官方定义及约束：允许 0/1；256 位时作用于 RC，512 位时作用于 RQ/RC；启用要求 RQ/RC 为 DWORD 对齐。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/ATC-Parameters-Tab
+
+C_ATS0_PARITY = 0（ATS 流接口奇偶校验）
+官方定义及约束：允许 0=关闭、1=生成、2=生成并检查；该选项独立于缓存 Integrity 选项。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/ATC-Parameters-Tab
+
+C_ATS0_PRI_TIMEOUT_LIMIT = 0（PRI 超时限制）
+官方定义及约束：公开范围为 0～8191 ms；本例为 0 ms，0 表示关闭超时。
+核对结果：本例取值在允许范围内，满足上述适用条件。
+官方链接：https://docs.amd.com/r/en-US/pg118-system-cache/ATS-Interface
+
+三、组合条件与关联资料
+
+缓存：容量 32768 字节，2 路，行长 16 个 32 位字。容量可划分为 256 组，每组包含上述路数的完整缓存行。
+主、从一致性均为 None；未启用 ACE、CCIX 或 CHI。独占访问设置符合非一致性模式的适用条件。
+https://docs.amd.com/r/en-US/pg118-system-cache/Core-Parameters-Tab
+https://docs.amd.com/r/en-US/pg118-system-cache/Protocol-Parameters-Tab
+
+AXI 位宽：安装版 check_widths 要求各已启用的从接口位宽不大于主接口位宽。工程中所有已启用接口均满足该关系，内部缓存数据位宽由工具自动匹配主接口。未手工修改自动生成的接口 ID、地址范围或 TUSER 宽度。
+https://docs.amd.com/r/en-US/pg118-system-cache/AXI4-Data-Widths
+https://docs.amd.com/r/en-US/pg118-system-cache/System-Cache-Parameters
+
+ATS：本例使用 256 位接口。PG118 与所引用的 PG213 要求 Straddle 配合 DWORD 对齐；256 位仅 RC 可使用该选项，512 位允许 CQ/CC/RQ/RC 使用。地址对齐通道未启用 Straddle；不使用 PASID。奇偶校验和 PRI 超时均为该功能公开提供的选项。
+https://docs.amd.com/r/en-US/pg118-system-cache/ATC-Parameters-Tab
+https://docs.amd.com/r/en-US/pg213-pcie4-ultrascale-plus/Data-Alignment-Options
+https://docs.amd.com/r/en-US/pg213-pcie4-ultrascale-plus/Straddle-Option-on-CQ-CC-and-RQ-Interfaces
+https://docs.amd.com/r/en-US/pg213-pcie4-ultrascale-plus/Straddle-Option-on-RC-Interface
+
+接入 PCIe 时，双方的数据宽度、对齐、Straddle 和奇偶校验设置应匹配；PG213 列出了 256/512 位可用配置。本工程用于复现 IP 自身的静态展开错误，没有建立 PCIe 链路或发出事务，未进行运行期地址映射、页请求或缓存访问。
+https://docs.amd.com/r/en-US/pg213-pcie4-ultrascale-plus/Supported-Clock-Frequencies-and-Interface-Widths
+https://docs.amd.com/r/en-US/pg118-system-cache/AXI4-Stream-ATS-Interfaces
+
+仿真：使用 Vivado 2026.1 自带 XSim 和官方仿真库。UG900 将生成快照与运行快照分为两个阶段；本例停在前一阶段，不涉及输入激励的协议合法性或功能模型比较。
+https://docs.amd.com/r/en-US/pg118-system-cache/Simulation
+https://docs.amd.com/r/en-US/ug900-vivado-logic-simulation/Elaborating-and-Generating-a-Design-Snapshot-xelab
