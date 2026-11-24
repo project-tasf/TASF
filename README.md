@@ -97,4 +97,4 @@ Fault14 &ensp; Vivado &ensp; [0D5Pd000023RH6tKAG](https://adaptivesupport.amd.co
 
 ***
 
-**We thank the AMD engineers and members of the AMD Community who reviewed our reports and helped clarify the behavior of the affected IP cores.**
+**We've had so much help from Vivado staff in finding and confirming bugs. I would like to express my gratitude here.**
